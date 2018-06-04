@@ -1,0 +1,44 @@
+buildscript {
+    ext.kotlin_version = '1.2.41'
+    ext.cassandraVersion="3.5.0"
+    ext.slf4jVersion = "1.7.25"
+    ext.rxJavaVersion = "2.1.1"
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    compile "com.datastax.cassandra:cassandra-driver-core:$cassandraVersion"
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.slf4j:slf4j-jdk14:$slf4jVersion"
+    compile "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
