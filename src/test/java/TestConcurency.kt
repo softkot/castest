@@ -31,7 +31,7 @@ class TestConcurency {
         @BeforeClass
         fun initTests() {
             doneTests()
-            session.execute("create table if not exists lock(id text primary KEY,owner text)")
+            session.execute("create table if not exists lock(id text primary KEY,owner text,tag text)")
         }
 
         @AfterClass
@@ -44,22 +44,23 @@ class TestConcurency {
      * Try to lock ID and returns 1 on success and 0 on failure (try repeat on exception)
      */
     fun singleLock(id: String): Int {
+        val tag = UUID.randomUUID().toString()
         while (true) try {
-            return session.execute(
+            return (session.execute(
                     QueryBuilder.insertInto("lock")
                             .value("id", id)
                             .value("owner", "me")
-                            .ifNotExists()
-                            .apply {
-                                serialConsistencyLevel = ConsistencyLevel.SERIAL
-                            }
-            )
-                    .wasApplied()
+                            .value("tag", tag)
+                            .ifNotExists())
+                    .wasApplied() || session.execute(
+                    QueryBuilder.select()
+                            .from("lock")
+                            .where(QueryBuilder.eq("id", id))).any { it.getString("tag") == tag })
                     .takeIf { it }
                     ?.let { 1 }
                     ?: 0
         } catch (e: Throwable) {
-            logger.info(e.message)
+            //logger.info(e.message)
             continue
         }
     }
